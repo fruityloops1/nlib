@@ -42,7 +42,6 @@ namespace detail {
         u32 size;
         std::vector<DirEntry> directories;
         std::vector<Entry> entries;
-        u32 ffAmount = 0x16;
 
         FNT() = default;
         FNT(BinaryReader& reader);

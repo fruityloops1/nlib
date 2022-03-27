@@ -102,21 +102,25 @@ FNT::FNT(BinaryReader& reader)
         else
             entries.push_back(Entry(reader, Entry::Type::Directory, false));
     }
-    while (reader.read<u8>() == 0xFF)
-        ffAmount++; // idk man what is this
-    reader.seek(reader.tell() - 1);
 }
 
 void FNT::write(BinaryWriter& writer) const
 {
     writer.write<u32>(0x464E5442); // 'FNTB'
-    writer.write(size);
+
+    size_t startOffset = writer.tell() + size - 4;
+    size_t fill = 128 - (startOffset % 128) - 8; // pad to 128 bytes
+    if (fill == 128)
+        fill = 0;
+    std::vector<u8> padding(fill, 0xFF);
+
+    printf("%u %zu\n", size, fill);
+
+    writer.write<u32>(size + fill);
     for (const DirEntry& dirEntry : directories)
         dirEntry.write(writer);
     for (const Entry& entry : entries)
         entry.write(writer);
-    std::vector<u8> ffs(ffAmount, 0xFF);
-    writer.write(std::span<const u8>(ffs));
 }
 
 FNT::DirEntry::DirEntry(BinaryReader& reader)
@@ -169,6 +173,13 @@ void FNT::Entry::write(BinaryWriter& writer) const
 
 IMG::IMG(BinaryReader& reader)
 {
+    size_t startOffset = reader.tell();
+    size_t fill = 128 - (startOffset % 128); // pad to 128 bytes
+    if (fill == 128)
+        fill = 0;
+    startOffset += fill;
+    reader.seek(startOffset - 8);
+
     NLIB_VERIFY(reader.read<u32>() == 0x46494D47 /* 'FIMG' */, "nlib::narc::detail::IMG::IMG: invalid magic", 0);
     u32 size = reader.read<u32>();
     size_t o = reader.tell();
@@ -178,9 +189,24 @@ IMG::IMG(BinaryReader& reader)
 
 void IMG::write(BinaryWriter& writer) const
 {
+    size_t startOffset = writer.tell();
+    size_t fill = 128 - (startOffset % 128); // pad to 128 bytes
+    if (fill == 128)
+        fill = 0;
+    std::vector<u8> padding(fill - 8, 0xFF);
+    writer.write(std::span<const u8>(padding));
+
     writer.write<u32>(0x46494D47); // 'FIMG'
-    writer.write<u32>(data.size());
+
+    startOffset = writer.tell() + 4 + data.size();
+    fill = 128 - (startOffset % 128); // pad to 128 bytes
+    if (fill == 128)
+        fill = 0;
+    padding = std::vector<u8>(fill, 0xFF);
+
+    writer.write<u32>(data.size() + fill + 8);
     writer.write(std::span<const u8>(data));
+    writer.write(std::span<const u8>(padding));
 }
 
 } // namespace nlib::narc::detail

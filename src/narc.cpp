@@ -49,6 +49,13 @@ std::vector<u8> Narc::toBinary()
         BinaryWriter imgWriter;
         int i = 0;
         for (const File& file : mFiles) {
+            size_t startOffset = imgWriter.tell();
+            size_t fill = 128 - (startOffset % 128); // pad to 128 bytes
+            if (fill == 128)
+                fill = 0;
+            std::vector<u8> padding(fill, 0xFF);
+            imgWriter.write(std::span<const u8>(padding));
+
             h.fat.entries[i].startOffset = imgWriter.tell();
             imgWriter.write(std::span<const u8>(file.data));
             h.fat.entries[i].endOffset = imgWriter.tell();
@@ -72,10 +79,11 @@ std::vector<u8> Narc::toBinary()
         endEntry.isEnd = true;
         h.fnt.entries.push_back(endEntry);
     }
-    size_t fntSize = h.fnt.ffAmount + 8 /* header size */ + 1 /* nameLength */;
+    size_t fntSize = 8 /* header size */ + 1 /* nameLength */;
     for (const File& file : mFiles)
         fntSize += file.name.length() + 1;
     fntSize += h.fnt.directories.size() * 8;
+
     h.fnt.size = fntSize;
 
     h.write(writer);
