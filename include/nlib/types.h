@@ -33,22 +33,29 @@ BSWAP_STRUCT(u64, ((val & 0x00000000000000FFULL) << 56) | ((val & 0x000000000000
 namespace nlib {
 
 class Exception {
+    const char* const mMessage { nullptr };
+
 public:
     template <typename... Args>
     Exception(const char* fmt, Args... args)
+        : mMessage(new char[snprintf(nullptr, 0, fmt, args...)])
     {
-        fprintf(stderr, fmt, args...);
-        abort();
+        sprintf((char*)mMessage, fmt, args...);
     }
+    ~Exception() { delete[] mMessage; }
+
+    virtual const char* msg() { return mMessage; }
+
+    operator const char*() { return msg(); }
 };
 
 } // namespace nlib
 
 #ifdef DEBUG
-#define NLIB_VERIFY(CONDITION, FMT, ...)                                                             \
-    {                                                                                                \
-        if (!(CONDITION))                                                                            \
-            throw ::nlib::Exception("thrown at: %s:%d\n" FMT "\n", __FILE__, __LINE__, __VA_ARGS__); \
+#define NLIB_VERIFY(CONDITION, FMT, ...)                                                        \
+    {                                                                                           \
+        if (!(CONDITION))                                                                       \
+            throw ::nlib::Exception("thrown at: %s:%d\n" FMT, __FILE__, __LINE__, __VA_ARGS__); \
     }
 #endif
 #ifndef DEBUG
