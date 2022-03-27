@@ -114,8 +114,6 @@ void FNT::write(BinaryWriter& writer) const
         fill = 0;
     std::vector<u8> padding(fill, 0xFF);
 
-    printf("%u %zu\n", size, fill);
-
     writer.write<u32>(size + fill);
     for (const DirEntry& dirEntry : directories)
         dirEntry.write(writer);
