@@ -59,4 +59,21 @@ void writeFile(const std::string& filename, std::span<T> data)
 
 std::string readFileString(const std::string& filename);
 
+template <typename... Args>
+char* format(const char* fmt, Args... args)
+{
+    char* msg = new char[snprintf(nullptr, 0, fmt, args...)];
+    sprintf(msg, fmt, args...);
+    return msg;
+}
+
+template <typename... Args>
+std::string format(const char* fmt, Args... args)
+{
+    std::string msg;
+    msg.resize(snprintf(nullptr, 0, fmt, args...));
+    sprintf(msg.data(), fmt, args...);
+    return msg;
+}
+
 } // namespace nlib::util
