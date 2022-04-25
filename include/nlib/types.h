@@ -51,13 +51,8 @@ public:
 
 } // namespace nlib
 
-#ifdef DEBUG
 #define NLIB_VERIFY(CONDITION, FMT, ...)                                                        \
     {                                                                                           \
         if (!(CONDITION))                                                                       \
             throw ::nlib::Exception("thrown at: %s:%d\n" FMT, __FILE__, __LINE__, __VA_ARGS__); \
     }
-#endif
-#ifndef DEBUG
-#define VERIFY(CONDITION, FMT, ...)
-#endif

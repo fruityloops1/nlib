@@ -15,7 +15,7 @@ public:
     template <typename T, bool Swap = true>
     T read()
     {
-        NLIB_VERIFY(mPos + sizeof(T) < mData.size(), "BinaryReader::read: reached end of file", 0);
+        NLIB_VERIFY(mPos + sizeof(T) < mData.size(), "BinaryReader::read: reached end of file (at: %zu, size: %zu)", mPos, sizeof(T));
         T& value = *(T*)&mData[mPos];
         mPos += sizeof(T);
 
@@ -36,6 +36,7 @@ public:
     inline size_t size() const { return mData.size(); }
     inline void setEndian(std::endian endian) { mEndian = endian; }
     inline std::endian getEndian() { return mEndian; }
+    inline const std::span<const u8>& data() { return mData; }
 
 private:
     std::span<const u8> mData;

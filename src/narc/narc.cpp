@@ -11,9 +11,7 @@ Narc::Narc(std::span<const u8> data)
     BinaryReader imgReader(header.img.data);
 
     for (int i = 0; i < header.fat.fileAmount; i++) {
-        size_t fileSize = header.fat.entries[i].endOffset - header.fat.entries[i].startOffset;
-        imgReader.seek(header.fat.entries[i].startOffset);
-        std::vector<u8> fileData = imgReader.read(fileSize);
+        std::vector<u8> fileData(imgReader.data().begin() + header.fat.entries[i].startOffset, imgReader.data().begin() + header.fat.entries[i].endOffset);
         mFiles.push_back({ header.fnt.entries[i].name, fileData });
     }
 }

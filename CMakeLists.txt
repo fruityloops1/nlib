@@ -21,8 +21,8 @@ add_executable(nlib
     src/binarywriter.cpp
     include/nlib/binarywriter.h
 
-    src/narc_detail.cpp
-    src/narc.cpp
+    src/narc/narc_detail.cpp
+    src/narc/narc.cpp
     include/nlib/file/narc.h
 
     src/main.cpp
