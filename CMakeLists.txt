@@ -11,7 +11,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include_directories(include)
 include_directories(lib/oead/src/include)
 
-add_executable(nlib
+add_library(nlib
     include/nlib/types.h
     include/nlib/util.h
     src/util.cpp
@@ -24,8 +24,6 @@ add_executable(nlib
     src/narc/narc_detail.cpp
     src/narc/narc.cpp
     include/nlib/file/narc.h
-
-    src/main.cpp
 )
 target_link_libraries(nlib PUBLIC oead)
 
